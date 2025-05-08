@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        SONAR_PROJECT_KEY = 'projet-dev '  // 🔁 Remplace par le nom réel de ton projet Sonar
+        SONAR_HOST_URL = 'http://localhost:9000' // 🔁 ou l’URL de ton serveur Sonar
+        SONAR_LOGIN = credentials('sonar-token') // 🔁 ID du token stocké dans Jenkins
+    }
+
     stages {
         stage('GIT') {
             steps {
@@ -21,15 +27,15 @@ pipeline {
             }
         }
 
-         stage('SonarQube Analysis') {
+        stage('SonarQube Analysis') {
             steps {
                 echo " Running SonarQube analysis"
                 withSonarQubeEnv('MySonarServer') {
                     sh """
                         mvn sonar:sonar \
-                        -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} \
-                        -Dsonar.host.url=${env.SONAR_HOST_URL} \
-                        -Dsonar.login=${env.SONAR_LOGIN}
+                        -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                        -Dsonar.host.url=${SONAR_HOST_URL} \
+                        -Dsonar.login=${SONAR_LOGIN}
                     """
                 }
             }
