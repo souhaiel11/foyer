@@ -2,34 +2,47 @@ pipeline {
     agent any
 
     environment {
-        SONAR_PROJECT_KEY = 'projet-dev '  // 🔁 Remplace par le nom réel de ton projet Sonar
-        SONAR_HOST_URL = 'http://localhost:9000' // 🔁 ou l’URL de ton serveur Sonar
-        SONAR_LOGIN = credentials('sonar-token') // 🔁 ID du token stocké dans Jenkins
+        // Configuration SonarQube
+        SONAR_PROJECT_KEY = 'projet-dev'                   // 🔁 À adapter
+        SONAR_HOST_URL = 'http://localhost:9000'
+        SONAR_LOGIN = credentials('sonar-token')           // 🔁 Token stocké dans Jenkins
     }
 
     stages {
-        stage('GIT') {
+
+        stage('📦 Clonage du dépôt Git privé') {
             steps {
-                echo "Getting Project from Git"
-                git branch: 'main', credentialsId: 'github-token', url: 'https://github.com/souhaiel11/foyer.git'
+                echo "🔁 Clonage du projet depuis GitHub"
+                git branch: 'main',
+                    url: 'https://github.com/TON-UTILISATEUR/TON-REPO.git',  // 🔁 Modifier ici
+                    credentialsId: 'github-token'  // 🔁 Assure-toi que c’est bien créé dans Jenkins > Credentials
             }
         }
 
-        stage('MVN CLEAN') {
+        stage('🧹 Nettoyage avec Maven') {
             steps {
+                echo "🧼 Suppression du dossier target"
                 sh 'mvn clean'
             }
         }
 
-        stage('MVN COMPILE') {
+        stage('⚙️ Compilation du code') {
             steps {
+                echo "🔧 Compilation avec mvn compile"
                 sh 'mvn compile'
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('📦 Packaging sans exécuter les tests') {
             steps {
-                echo " Running SonarQube analysis"
+                echo "🎯 Génération du livrable (tests désactivés)"
+                sh 'mvn package -DskipTests -e'  // ❌ Skip tests à cause de l'absence de la base de données
+            }
+        }
+
+        stage('🔍 Analyse SonarQube') {
+            steps {
+                echo "📊 Analyse qualité avec SonarQube"
                 withSonarQubeEnv('MySonarServer') {
                     sh """
                         mvn sonar:sonar \
@@ -39,6 +52,15 @@ pipeline {
                     """
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Pipeline exécuté avec succès"
+        }
+        failure {
+            echo "❌ Le pipeline a échoué. Vérifie les erreurs dans la console Jenkins."
         }
     }
 }
