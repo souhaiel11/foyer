@@ -14,7 +14,7 @@ pipeline {
             steps {
                 echo "🔁 Clonage du projet depuis GitHub"
                 git branch: 'main',
-                    url: 'https://github.com/TON-UTILISATEUR/TON-REPO.git',  // 🔁 Modifier ici
+                    url: 'https://github.com/souhaiel11/foyer.git',  // 🔁 Modifier ici
                     credentialsId: 'github-token'  // 🔁 Assure-toi que c’est bien créé dans Jenkins > Credentials
             }
         }
